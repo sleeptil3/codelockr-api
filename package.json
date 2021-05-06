@@ -1,0 +1,9 @@
+{
+  "name": "codelockr-api",
+  "version": "0.0.1",
+  "description": "Back end API DB using mongoose and express",
+  "main": "server.js",
+  "repository": "https://github.com/sleeptil3/codelockr-api.git",
+  "author": "sclary110 <sclary@icloud.com>",
+  "license": "MIT"
+}
