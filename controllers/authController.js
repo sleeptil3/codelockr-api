@@ -7,15 +7,17 @@ module.exports.hash = (password) => {
 	return crypto.createHmac('sha256', SECRET).update(password).digest('hex').split('').reverse().join('')
 }
 
+
 module.exports.auth = (req, res, next) => {
 	const authHeader = req.headers.authorization
 	if (authHeader) {
 		const token = authHeader.split(' ')[1]
+		console.log(token)
 		jwt.verify(token, SECRET, (err, user) => {
 			if (err) {
 				res.sendStatus(403)
 			} else {
-				if (user.username === req.body.username) {
+				if (user.username === req.params.username) {
 					res.locals.user = user.username
 					next()
 				} else if (req.method === 'POST' || req.method === 'DELETE') {
@@ -26,6 +28,7 @@ module.exports.auth = (req, res, next) => {
 			}
 		})
 	} else {
+		console.error('no auth header')
 		res.sendStatus(401)
 	}
 }
