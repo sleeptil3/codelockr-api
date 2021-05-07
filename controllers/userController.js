@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const Folder = require('../models/Folder')
-const { auth } = require('./authController')
+const { auth } = require('./authController');
+const Snippet = require('../models/Snippet');
 
 
 // SHOW ROUTES
@@ -17,6 +18,7 @@ router.get('/:username', auth, (req, res) => {
 })
 
 // CREATE ROUTES
+// Add a folder to a user
 router.post('/:username/addfolder', auth, async (req, res) => {
 	try {
 		const newFolder = await Folder.create(req.body)
@@ -29,6 +31,18 @@ router.post('/:username/addfolder', auth, async (req, res) => {
 
 	} catch (err) {
 		res.status(400).json({ msg: err.message })
+	}
+})
+
+// Add a Snippet
+router.post('/:username/addsnippet', async (req, res) => {
+	try {
+		const newSnippet = await Snippet.create(req.body)
+		const foundUser = await User.findById(newSnippet.owner)
+		console.log(foundUser.folders)
+		res.status(200).json(foundUser)
+	} catch (error) {
+		res.status(400).json({ msg: error.message })
 	}
 })
 

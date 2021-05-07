@@ -8,6 +8,7 @@ const userSchema = new Schema({
 	lastName: { type: String, required: true },
 	folders: [{ type: Schema.Types.ObjectId, ref: 'Folder' }],
 	friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+	approvedRequest: { type: Boolean, default: false },
 	createdAt: { type: Date, default: Date.now }
 
 })
