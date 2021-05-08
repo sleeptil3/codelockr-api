@@ -27,9 +27,7 @@ router.post('/:username/addfolder', auth, async (req, res) => {
 	try {
 		const newFolder = await Folder.create(req.body)
 		const updatedUser = await User.findByIdAndUpdate(newFolder.owner, {
-			$push: {
-				folders: [newFolder._id]
-			}
+			$addToSet: { folders: newFolder._id }
 		}, { new: true })
 		if (updatedUser) res.status(200).json(updatedUser)
 		else res.status(400).json({ msg: "unable to create folder" })
@@ -43,11 +41,9 @@ router.post('/:username/:folder_id/addsnippet', auth, async (req, res) => {
 	try {
 		const newSnippet = await Snippet.create(req.body)
 		const foundFolder = await Folder.findByIdAndUpdate(req.params.folder_id, {
-			$push: {
-				snippets: [newSnippet._id]
-			}
+			$addToSet: { snippets: newSnippet._id }
 		}).select('-password')
-		res.status(200).json(newSnippet)
+		res.status(200).json(newSnippet, foundFolder)
 	} catch (error) {
 		res.status(400).json({ msg: error.message })
 	}
@@ -60,15 +56,11 @@ router.put('/:username/addfriend/:friend_username', auth, async (req, res) => {
 		const friendToAdd = await User.findOne({ username: req.params.friend_username }).select('-password')
 		// Update self with the sent request
 		const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, {
-			$push: {
-				friendRequestsSent: [friendToAdd._id]
-			}
+			$addToSet: { friendRequestsSent: friendToAdd._id }
 		}).select('-password')
 		// Update friend with received request
 		const updatedFriend = await User.findOneAndUpdate({ username: req.params.friend_username }, {
-			$push: {
-				friendRequestsReceived: [updatedUser._id]
-			}
+			$addToSet: { friendRequestsReceived: updatedUser._id }
 		}).select('-password')
 		res.status(200).json({ msg: `Friend Request Sent to ${friendToAdd.firstName} ${friendToAdd.lastName}` })
 	} catch (err) {
@@ -91,7 +83,7 @@ router.put('/:username/edit', auth, async (req, res) => {
 			id: createdUser._id,
 			username: createdUser.username
 		}, SECRET)
-		res.status(200).json({ token: token, username: updatedUser.username })
+		res.status(200).json({ token: token, ...updatedUser })
 	} else {
 		res.status(200).json(updatedUser)
 	}
@@ -100,7 +92,12 @@ router.put('/:username/edit', auth, async (req, res) => {
 // Edit Snippet
 router.put('/:username/snippets/:snippet_id/edit', auth, async (req, res) => {
 	try {
-		const updatedSnippet = await Snippet.findByIdAndUpdate(req.params.snippet_id, { ...req.body, updated: Date.now() }, { new: true })
+		const updatedSnippet = await Snippet.findByIdAndUpdate(req.params.snippet_id, {
+			...req.body,
+			$currentDate: { updated: true }
+		},
+			{ new: true }
+		)
 		res.status(200).json(updatedSnippet)
 	} catch (err) {
 		res.status(200).json({ msg: err.message })
@@ -110,7 +107,12 @@ router.put('/:username/snippets/:snippet_id/edit', auth, async (req, res) => {
 // Edit Folder
 router.put('/:username/folders/:folder_id/edit', auth, async (req, res) => {
 	try {
-		const updatedFolder = await Folder.findByIdAndUpdate(req.params.folder_id, { ...req.body, updated: Date.now() }, { new: true })
+		const updatedFolder = await Folder.findByIdAndUpdate(req.params.folder_id, {
+			...req.body,
+			$currentDate: { updated: true }
+		},
+			{ new: true }
+		)
 		res.status(200).json(updatedFolder)
 	} catch (err) {
 		res.status(200).json({ msg: err.message })
@@ -122,21 +124,13 @@ router.put('/:username/folders/:folder_id/edit', auth, async (req, res) => {
 router.put('/:username/approvefriend/:friend_id', auth, async (req, res) => {
 	try {
 		const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, {
-			$pull: {
-				friendRequestsSent: [req.params.friend_id]
-			},
-			$push: {
-				friends: [req.params.friend_id]
-			}
+			$pull: { friendRequestsSent: req.params.friend_id },
+			$addToSet: { friends: req.params.friend_id }
 		}).select('-password')
 		// Update friend with received request
 		const updatedFriend = await User.findByIdAndUpdate(req.params.friend_id, {
-			$push: {
-				friends: [updatedUser._id]
-			},
-			$pull: {
-				friendRequestsReceived: [updatedUser._id]
-			},
+			$addToSet: { friends: updatedUser._id },
+			$pull: { friendRequestsReceived: updatedUser._id }
 		}).select('-password')
 		res.status(200).json({ msg: `Approved: ${updatedFriend.firstName} ${updatedFriend.lastName}` })
 	} catch (err) {
@@ -149,20 +143,19 @@ router.put('/:username/approvefriend/:friend_id', auth, async (req, res) => {
 router.put('/:username/denyfriend/:friend_id', auth, async (req, res) => {
 	try {
 		const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, {
-			$pull: {
-				friendRequestsReceived: [req.params.friend_id]
-			}
+			$pull: { friendRequestsReceived: req.params.friend_id }
 		}).select('-password')
 		const updatedFriend = await User.findByIdAndUpdate(req.params.friend_id, {
-			$pull: {
-				friendRequestsSent: [updatedUser._id]
-			}
+			$pull: { friendRequestsSent: updatedUser._id }
 		}).select('-password')
 		res.status(200).json({ msg: `Denied: ${updatedFriend.firstName} ${updatedFriend.lastName}` })
 	} catch (err) {
 		res.status(400).json({ msg: err.message })
 	}
 })
+
+// Add Share with a Friend
+// This will send a request to the friend to add the snippet data as a new snippet to a chosen folder
 
 
 // DELETE ROUTES ////////////////////////////////////////////
@@ -176,11 +169,15 @@ router.delete('/:username/delete', auth, async (req, res) => {
 		res.status(400).json({ msg: err.message })
 	}
 })
+// ADD: capture the friends in an array and map over it ($each?) to remove deleted user from friend lists
 
 // Delete Snippet
 router.delete('/:username/snippets/:snippet_id/delete', auth, async (req, res) => {
 	try {
 		const deletedSnippet = await Snippet.findByIdAndDelete(req.params.snippet_id)
+		const foundFolder = await Folder.findByIdAndUpdate(deletedSnippet.parentFolder, {
+			$pull: { snippets: deletedSnippet._id }
+		}).select('-password')
 		res.status(200).json(deletedSnippet)
 	} catch (err) {
 		res.status(200).json({ msg: err.message })
@@ -191,6 +188,7 @@ router.delete('/:username/snippets/:snippet_id/delete', auth, async (req, res) =
 router.delete('/:username/folders/:folder_id/delete', auth, async (req, res) => {
 	try {
 		const deletedFolder = await Folder.findByIdAndDelete(req.params.folder_id)
+		const updateUser = await User.findByIdAndUpdate(deletedFolder.owner, { $pull: { folders: deletedFolder._id } })
 		res.status(200).json(deletedFolder)
 	} catch (err) {
 		res.status(200).json({ msg: err.message })
