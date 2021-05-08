@@ -6,9 +6,10 @@ const snippetSchema = new Schema({
 	parseFormat: { type: String, required: true },
 	notes: String,
 	owner: { type: Schema.Types.ObjectId, ref: 'User' },
-	parentFolder: { type: Schema.Types.ObjectId, ref: 'Folder' },
 	sharedWith: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-	createdAt: { type: Date, default: Date.now }
+	created: { type: Date, default: Date.now, immutable: true },
+	updated: { type: Date, default: Date.now },
+	isPrivate: { type: Boolean, default: true, required: true },
 })
 
 module.exports = model('Snippet', snippetSchema)

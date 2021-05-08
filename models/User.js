@@ -7,10 +7,10 @@ const userSchema = new Schema({
 	firstName: { type: String, required: true },
 	lastName: { type: String, required: true },
 	folders: [{ type: Schema.Types.ObjectId, ref: 'Folder' }],
+	friendRequestsReceived: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+	friendRequestsSent: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 	friends: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-	approvedRequest: { type: Boolean, default: false },
-	createdAt: { type: Date, default: Date.now }
-
+	created: { type: Date, default: Date.now, immutable: true }
 })
 
 module.exports = model('User', userSchema)

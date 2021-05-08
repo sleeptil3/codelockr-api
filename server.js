@@ -2,14 +2,9 @@ const express = require('express')
 require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const { auth } = require('./controllers/authController')
 
 const app = express()
-const SECRET = process.env.SECRET_KEY
 const port = process.env.PORT || 3030;
-
 
 ////////////////
 // MIDDLEWARE //
@@ -26,7 +21,7 @@ mongoose.connect(process.env.MONGO_URI, {
 	useUnifiedTopology: true,
 	useNewUrlParser: true,
 	useCreateIndex: true,
-	useFindAndModify: true
+	useFindAndModify: false
 })
 
 mongoose.connection.once('connected', () => console.log('Connected to Mongo, life is good.'))
@@ -35,8 +30,9 @@ mongoose.connection.once('connected', () => console.log('Connected to Mongo, lif
 // ROUTES //
 ////////////
 
-app.use('/user', require('./controllers/userController'))
 app.use('/', require('./controllers/rootController'))
+app.use('/user', require('./controllers/userController'))
+app.use('/admin', require('./controllers/adminController'))
 
 //////////////
 // LISTENER //
