@@ -10,7 +10,7 @@ const snippetSchema = new Schema({
 	parentFolder: [{ type: Schema.Types.ObjectId, ref: 'Folder', required: true }],
 	created: { type: Date, default: Date.now, immutable: true },
 	updated: { type: Date, default: Date.now },
-	isPrivate: { type: Boolean, default: true },
+	isPrivate: { type: Boolean, default: true }
 })
 
 module.exports = model('Snippet', snippetSchema)
