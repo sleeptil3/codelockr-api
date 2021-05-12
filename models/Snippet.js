@@ -1,16 +1,16 @@
 const { Schema, model } = require('mongoose')
 
 const snippetSchema = new Schema({
-	title: { type: String, required: true, unique: true },
+	title: { type: String, required: true },
 	code: { type: String, required: true },
 	parseFormat: { type: String, required: true },
 	notes: String,
-	owner: { type: Schema.Types.ObjectId, ref: 'User' },
+	owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 	sharedWith: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-	parentFolder: [{ type: Schema.Types.ObjectId, ref: 'Folder' }],
+	parentFolder: [{ type: Schema.Types.ObjectId, ref: 'Folder', required: true }],
 	created: { type: Date, default: Date.now, immutable: true },
 	updated: { type: Date, default: Date.now },
-	isPrivate: { type: Boolean, default: true, required: true },
+	isPrivate: { type: Boolean, default: true },
 })
 
 module.exports = model('Snippet', snippetSchema)

@@ -13,10 +13,19 @@ const SECRET = process.env.SECRET_KEY
 
 // GET userdata for dashboard
 router.get('/:username', auth, (req, res) => {
-	const userQuery = User.findOne({ username: req.params.username }).select('-password').populate('folders').populate('snippets')
+	const userQuery = User.findOne({ username: req.params.username }).select('-password').populate('folders')
 	userQuery.exec((err, foundUser) => {
 		if (err) res.status(400).json({ msg: err.message })
 		else res.status(200).json(foundUser)
+	})
+})
+
+// GET all snippets for user
+router.get('/:username/:user_id/allsnippets', auth, (req, res) => {
+	const snippetQuery = Snippet.find({ owner: req.params.user_id })
+	snippetQuery.exec((err, foundSnippets) => {
+		if (err) res.status(400).json({ msg: err.message })
+		else res.status(200).json(foundSnippets)
 	})
 })
 
