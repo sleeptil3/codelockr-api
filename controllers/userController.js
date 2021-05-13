@@ -38,7 +38,7 @@ router.post('/:username/addfolder', auth, async (req, res) => {
 		const updatedUser = await User.findByIdAndUpdate(newFolder.owner, {
 			$addToSet: { folders: newFolder._id }
 		}, { new: true })
-		if (updatedUser) res.status(200).json(updatedUser)
+		if (updatedUser) res.status(200).json(newFolder)
 		else res.status(400).json({ msg: "unable to create folder" })
 	} catch (err) {
 		res.status(400).json({ msg: err.message })
@@ -49,12 +49,13 @@ router.post('/:username/addfolder', auth, async (req, res) => {
 router.post('/:username/:folder_id/addsnippet', auth, async (req, res) => {
 	try {
 		const newSnippet = await Snippet.create(req.body)
-		const foundFolder = await Folder.findByIdAndUpdate(req.params.folder_id, {
+		const foundFolder = await Folder.findByIdAndUpdate(newSnippet.parentFolder, {
 			$addToSet: { snippets: newSnippet._id }
-		}).select('-password')
-		res.status(200).json(newSnippet, foundFolder)
+		}, { new: true })
+		res.status(200).json({ newSnippet, foundFolder })
 	} catch (error) {
 		res.status(400).json({ msg: error.message })
+		console.error(error)
 	}
 })
 
@@ -102,7 +103,9 @@ router.put('/:username/edit', auth, async (req, res) => {
 router.put('/:username/snippets/:snippet_id/edit', auth, async (req, res) => {
 	try {
 		const updatedSnippet = await Snippet.findByIdAndUpdate(req.params.snippet_id, {
-			...req.body,
+			title: req.body.title,
+			code: req.body.code,
+			notes: req.body.notes,
 			$currentDate: { updated: true }
 		},
 			{ new: true }
