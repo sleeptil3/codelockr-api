@@ -88,15 +88,7 @@ router.put('/:username/edit', auth, async (req, res) => {
 		req.body.password = bcrypt.hashSync(hashedPassword, bcrypt.genSaltSync(10))
 	}
 	const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, req.body, { new: true }).select('-password')
-	if (req.body.password) {
-		const token = jwt.sign({
-			id: createdUser._id,
-			username: createdUser.username
-		}, SECRET)
-		res.status(200).json({ token: token, ...updatedUser })
-	} else {
-		res.status(200).json(updatedUser)
-	}
+	res.status(200).json(updatedUser)
 })
 
 // Edit Snippet
