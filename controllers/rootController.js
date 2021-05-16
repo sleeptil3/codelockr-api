@@ -15,7 +15,7 @@ router.post('/login', async (req, res) => {
 	const { username, password } = req.body
 	const hashedPassword = hash(password)
 	await User.findOne({ username }, (err, foundUser) => {
-		if (err) res.status(400).json({ msg: err.message })
+		if (foundUser === null) res.status(400).json({ msg: "err.message" })
 		else {
 			if (bcrypt.compareSync(hashedPassword, foundUser.password)) {
 				const token = jwt.sign({

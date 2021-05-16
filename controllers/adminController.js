@@ -1,16 +1,31 @@
-const express = require('express');
-const router = express.Router();
-const User = require('../models/User');
+const express = require('express')
+const router = express.Router()
+const User = require('../models/User')
+const Folder = require('../models/Folder')
+const Snippet = require('../models/Snippet')
 const { adminAuth } = require('./authController')
 
 // SHOW ALL USERS
 
 router.get('/users', adminAuth, (req, res) => {
-	const userQuery = User.find({}).select('-password')
+	const userQuery = User.find({ username: { $ne: "admin" } }).select('-password')
 	userQuery.exec((err, foundUsers) => {
 		if (err) res.status(400).json({ msg: err.message })
 		else res.status(200).json(foundUsers)
 	})
+})
+
+// GET RECORD COUNTS
+
+router.get('/count', adminAuth, async (req, res) => {
+	try {
+		const userCount = await User.countDocuments()
+		const folderCount = await Folder.countDocuments()
+		const snippetCount = await Snippet.countDocuments()
+		res.status(200).json({ userCount, folderCount, snippetCount })
+	} catch (error) {
+		res.status(400).json({ msg: error.message })
+	}
 })
 
 // SHOW ONE USER
