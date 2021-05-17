@@ -28,20 +28,36 @@ router.post('/login', async (req, res) => {
 	})
 })
 
+// router.post('/register', async (req, res) => {
+// 	const hashedPassword = hash(req.body.password)
+// 	req.body.password = bcrypt.hashSync(hashedPassword, bcrypt.genSaltSync(10))
+
+// 	await User.create(req.body, (err, createdUser) => {
+// 		if (err) res.status(400).json(err)
+// 		else {
+// 			const token = jwt.sign({
+// 				id: createdUser._id,
+// 				username: createdUser.username
+// 			}, SECRET)
+// 			res.status(200).json({ token: token, createdUser: createdUser })
+// 		}
+// 	})
+// })
+
 router.post('/register', async (req, res) => {
 	const hashedPassword = hash(req.body.password)
 	req.body.password = bcrypt.hashSync(hashedPassword, bcrypt.genSaltSync(10))
-
-	await User.create(req.body, (err, createdUser) => {
-		if (err) res.status(400).json({ msg: err.message })
-		else {
-			const token = jwt.sign({
-				id: createdUser._id,
-				username: createdUser.username
-			}, SECRET)
-			res.status(200).json({ token: token, createdUser: createdUser })
-		}
-	})
+	try {
+		const createdUser = await User.create(req.body)
+		const token = jwt.sign({
+			id: createdUser._id,
+			username: createdUser.username
+		}, SECRET)
+		res.status(200).json({ token: token, createdUser: createdUser })
+	} catch (error) {
+		res.status(400).json({ error: Object.keys(error.keyPattern)[0] })
+	}
 })
+
 
 module.exports = router

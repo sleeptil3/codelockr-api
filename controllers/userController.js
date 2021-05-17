@@ -5,7 +5,6 @@ const Folder = require('../models/Folder')
 const { auth, hash } = require('./authController');
 const Snippet = require('../models/Snippet');
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 
 const SECRET = process.env.SECRET_KEY
 
@@ -13,7 +12,7 @@ const SECRET = process.env.SECRET_KEY
 
 // GET userdata for dashboard
 router.get('/:username', auth, (req, res) => {
-	const userQuery = User.findOne({ username: req.params.username }).select('-password').populate('folders')
+	const userQuery = User.findOne({ username: req.params.username }).select('-password').populate('folders').populate('friends', 'firstName lastName').populate('friendRequestsSent', 'firstName lastName').populate('friendRequestsReceived', 'firstName lastName')
 	userQuery.exec((err, foundUser) => {
 		if (err) res.status(400).json({ msg: err.message })
 		else res.status(200).json(foundUser)
@@ -27,6 +26,14 @@ router.get('/:username/:user_id/allsnippets', auth, (req, res) => {
 		if (err) res.status(400).json({ msg: err.message })
 		else res.status(200).json(foundSnippets)
 	})
+})
+
+// GET all snippets for user's friends
+router.get('/:username/friendsnippets', auth, async (req, res) => {
+	const user = await User.findOne({ username: req.params.username }).select('friends')
+	const snippetQuery = await Snippet.find({ isPrivate: true }).where('owner').all([...user.friends]).populate('owner', 'firstName lastName')
+	if (snippetQuery.length === 0) res.status(400).json({ msg: 'no snippets found' })
+	else res.status(200).json(snippetQuery)
 })
 
 // CREATE ROUTES ////////////////////////////////////////////
@@ -128,13 +135,13 @@ router.put('/:username/folders/:folder_id/edit', auth, async (req, res) => {
 router.put('/:username/approvefriend/:friend_id', auth, async (req, res) => {
 	try {
 		const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, {
-			$pull: { friendRequestsSent: req.params.friend_id },
+			$pull: { friendRequestsReceived: req.params.friend_id },
 			$addToSet: { friends: req.params.friend_id }
 		}).select('-password')
 		// Update friend with received request
 		const updatedFriend = await User.findByIdAndUpdate(req.params.friend_id, {
 			$addToSet: { friends: updatedUser._id },
-			$pull: { friendRequestsReceived: updatedUser._id }
+			$pull: { friendRequestsSent: updatedUser._id }
 		}).select('-password')
 		res.status(200).json({ msg: `Approved: ${updatedFriend.firstName} ${updatedFriend.lastName}` })
 	} catch (err) {
