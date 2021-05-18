@@ -31,7 +31,7 @@ router.get('/:username/:user_id/allsnippets', auth, (req, res) => {
 // GET all snippets for user's friends
 router.get('/:username/friendsnippets', auth, async (req, res) => {
 	const user = await User.findOne({ username: req.params.username }).select('friends')
-	const snippetQuery = await Snippet.find({ isPrivate: true }).where('owner').all([...user.friends]).populate('owner', 'firstName lastName')
+	const snippetQuery = await Snippet.find({ isPrivate: false, owner: [...user.friends] }).populate('owner', 'firstName lastName')
 	if (snippetQuery.length === 0) res.status(400).json({ msg: 'no snippets found' })
 	else res.status(200).json(snippetQuery)
 })
@@ -81,7 +81,7 @@ router.put('/:username/addfriend/:friend_username', auth, async (req, res) => {
 		}).select('-password')
 		res.status(200).json({ msg: `Friend Request Sent to ${friendToAdd.firstName} ${friendToAdd.lastName}` })
 	} catch (err) {
-		res.status(400).json({ msg: err.message })
+		res.status(400).json({ error: err.message })
 	}
 })
 
@@ -102,9 +102,7 @@ router.put('/:username/edit', auth, async (req, res) => {
 router.put('/:username/snippets/:snippet_id/edit', auth, async (req, res) => {
 	try {
 		const updatedSnippet = await Snippet.findByIdAndUpdate(req.params.snippet_id, {
-			title: req.body.title,
-			code: req.body.code,
-			notes: req.body.notes,
+			...req.body,
 			$currentDate: { updated: true }
 		},
 			{ new: true }

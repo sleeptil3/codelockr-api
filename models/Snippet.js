@@ -10,7 +10,7 @@ const snippetSchema = new Schema({
 	sharedWith: [{ type: Schema.Types.ObjectId, ref: 'User' }],
 	created: { type: Date, default: Date.now, immutable: true },
 	updated: { type: Date, default: Date.now },
-	isPrivate: { type: Boolean, default: true }
+	isPrivate: Boolean
 })
 
 module.exports = model('Snippet', snippetSchema)
