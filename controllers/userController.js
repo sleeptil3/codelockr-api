@@ -5,6 +5,7 @@ const Folder = require('../models/Folder')
 const { auth, hash } = require('./authController');
 const Snippet = require('../models/Snippet');
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const SECRET = process.env.SECRET_KEY
 
@@ -95,7 +96,11 @@ router.put('/:username/edit', auth, async (req, res) => {
 		req.body.password = bcrypt.hashSync(hashedPassword, bcrypt.genSaltSync(10))
 	}
 	const updatedUser = await User.findOneAndUpdate({ username: req.params.username }, req.body, { new: true }).select('-password')
-	res.status(200).json(updatedUser)
+	const token = await jwt.sign({
+		id: updatedUser._id,
+		username: updatedUser.username
+	}, SECRET)
+	res.status(200).json({ updatedUser: updatedUser, token: token })
 })
 
 // Edit Snippet
