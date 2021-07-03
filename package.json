@@ -1,6 +1,6 @@
 {
   "name": "codelockr-api",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Back end API DB using mongoose and express",
   "main": "server.js",
   "repository": "https://github.com/sleeptil3/codelockr-api.git",
@@ -13,10 +13,10 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dotenv": "^9.0.0",
+    "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.12.7",
-    "nodemon": "^2.0.7"
+    "mongoose": "^5.13.1",
+    "nodemon": "^2.0.9"
   }
 }

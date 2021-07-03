@@ -7,7 +7,6 @@ module.exports.hash = (password) => {
 	return crypto.createHmac('sha256', SECRET).update(password).digest('hex').split('').reverse().join('')
 }
 
-
 module.exports.auth = (req, res, next) => {
 	const authHeader = req.headers.authorization
 	if (authHeader) {
