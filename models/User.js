@@ -13,4 +13,5 @@ const userSchema = new Schema({
 	created: { type: Date, default: Date.now, immutable: true }
 })
 
+
 module.exports = model('User', userSchema)
