@@ -17,7 +17,7 @@ router.post('/auth', async (req, res) => {
 					if (foundUser === null) res.status(400).json({ error: "Unable to find existing user with that email address", message: err })
 					else {
 						const newUserPassword = generatePassword(12, false)
-						let hashedUserPassword = hash(newPassword)
+						let hashedUserPassword = hash(newUserPassword)
 						hashedUserPassword = bcrypt.hashSync(hashedUserPassword, bcrypt.genSaltSync(10))
 						User.findOneAndUpdate({ username: foundUser.username }, { password: hashedUserPassword }, async (err, editedUser) => {
 							if (err) res.status(400).json({ error: "Error when attempting to save new password to user account", message: err })
