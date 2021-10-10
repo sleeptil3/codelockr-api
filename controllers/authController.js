@@ -1,7 +1,7 @@
-require('dotenv').config();
+require('dotenv').config()
 const SECRET = process.env.SECRET_KEY;
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
+const jwt = require('jsonwebtoken')
+const crypto = require('crypto')
 
 module.exports.hash = (password) => {
 	return crypto.createHmac('sha256', SECRET).update(password).digest('hex').split('').reverse().join('')
