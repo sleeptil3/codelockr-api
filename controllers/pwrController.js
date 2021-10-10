@@ -16,10 +16,10 @@ router.post('/auth', async (req, res) => {
 				await User.findOne({ email: userEmail }, (err, foundUser) => {
 					if (foundUser === null) res.status(400).json({ error: "Unable to find existing user with that email address", message: err })
 					else {
-						const newPassword = generatePassword(12, false)
-						let hashedPassword = hash(newPassword)
-						hashedPassword = bcrypt.hashSync(hashedPassword, bcrypt.genSaltSync(10))
-						User.findOneAndUpdate({ username: foundUser.username }, { password: newPassword }, async (err, editedUser) => {
+						const newUserPassword = generatePassword(12, false)
+						let hashedUserPassword = hash(newPassword)
+						hashedUserPassword = bcrypt.hashSync(hashedUserPassword, bcrypt.genSaltSync(10))
+						User.findOneAndUpdate({ username: foundUser.username }, { password: hashedUserPassword }, async (err, editedUser) => {
 							if (err) res.status(400).json({ error: "Error when attempting to save new password to user account", message: err })
 							else {
 								const templateData = {
@@ -29,7 +29,7 @@ router.post('/auth', async (req, res) => {
 									lastName: foundUser.lastName,
 									username: foundUser.username,
 									emailAddress: foundUser.email,
-									newPassword: newPassword
+									newPassword: newUserPassword
 								}
 								// https://sleeptil3software-mailserver.herokuapp.com/send
 								// http://localhost:8088/send
