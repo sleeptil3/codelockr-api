@@ -38,13 +38,11 @@ router.post('/auth', async (req, res) => {
 										.post('https://sleeptil3software-mailserver.herokuapp.com/send', { ...templateData })
 										.then(response => {
 											if (response.status !== 200) res.status(400).json({ error: "Error when sending email (mail server)", message: response.data })
-											else res.status(200).json({ status: "Password Reset  - Email Sent", message: response.data })
-											console.log(`statusCode: ${ response.status }`)
-											console.log(response)
+											else res.status(200).json({ status: "Password Reset  - Email Sent" })
 										})
 										.catch(error => {
 											console.error(error)
-											res.status(400).json({ error: "Server error when executing send mail code (codelockr-api)", message: JSON.stringify(error), user: editedUser })
+											res.status(400).json({ error: "Server error when executing send mail code (codelockr-api)", message: JSON.stringify(error) })
 										})
 								}
 							}).select('-password')
