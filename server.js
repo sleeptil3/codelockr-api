@@ -2,7 +2,6 @@ const express = require('express')
 require('dotenv').config()
 const mongoose = require('mongoose')
 const cors = require('cors')
-
 const app = express()
 const port = process.env.PORT || 3030;
 
@@ -33,6 +32,7 @@ mongoose.connection.once('connected', () => console.log('Connected to Mongo, lif
 app.use('/', require('./controllers/rootController'))
 app.use('/user', require('./controllers/userController'))
 app.use('/admin', require('./controllers/adminController'))
+app.use('/pwr', require('./controllers/pwrController'))
 
 //////////////
 // LISTENER //
