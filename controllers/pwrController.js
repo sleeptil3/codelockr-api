@@ -8,11 +8,9 @@ const axios = require('axios')
 
 router.post('/auth', async (req, res) => {
 	try {
-		console.log(req.body)
 		const { PWR_USER, PWR_PASS, userEmail } = req.body
-		console.log("PWR_USER, PWR_PASS, userEmail", PWR_USER, PWR_PASS, userEmail)
+		const hashedPassword = hash(PWR_PASS)
 		await User.findOne({ username: PWR_USER }, async (err, foundUser) => {
-			const hashedPassword = hash(PWR_PASS)
 			if (foundUser === null) res.status(400).json({ status: "PWR User not found", error: err })
 			else {
 				if (bcrypt.compareSync(hashedPassword, foundUser.password)) {
