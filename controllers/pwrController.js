@@ -43,10 +43,10 @@ router.post("/auth", async (req, res) => {
 											emailAddress: foundUser.email,
 											newPassword: newUserPassword,
 										}
-										// Prod: https://sleeptil3software-mailserver.herokuapp.com/send
-										// Dev:	http://localhost:8088/send
 										axios
+											// .post("http://localhost:8088/send", {		// DEV
 											.post("https://sleeptil3software-mailserver.herokuapp.com/send", {
+												// PROD
 												...mailserverData,
 											})
 											.then(response => {
