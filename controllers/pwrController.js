@@ -34,7 +34,7 @@ router.post("/auth", async (req, res) => {
 											message: err,
 										})
 									else {
-										const templateData = {
+										const mailserverData = {
 											service: "CODELOCKR",
 											action: "PW_RESET",
 											firstName: foundUser.firstName,
@@ -43,11 +43,11 @@ router.post("/auth", async (req, res) => {
 											emailAddress: foundUser.email,
 											newPassword: newUserPassword,
 										}
-										// https://sleeptil3software-mailserver.herokuapp.com/send
-										// http://localhost:8088/send
+										// Prod: https://sleeptil3software-mailserver.herokuapp.com/send
+										// Dev:	http://localhost:8088/send
 										axios
 											.post("https://sleeptil3software-mailserver.herokuapp.com/send", {
-												...templateData,
+												...mailserverData,
 											})
 											.then(response => {
 												if (response.status !== 200)
